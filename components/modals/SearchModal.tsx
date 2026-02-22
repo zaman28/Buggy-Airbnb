@@ -86,11 +86,14 @@ const SearchModal = ({ onCloseModal }: { onCloseModal?: () => void }) => {
 
     const updatedQuery: any = {
       ...currentQuery,
-      country: location?.label,
       guestCount,
       roomCount,
       bathroomCount,
     };
+
+    if (location?.label) {
+      updatedQuery.country = location.label;
+    }
 
     if (dateRange.startDate) {
       updatedQuery.startDate = formatISO(dateRange.startDate);

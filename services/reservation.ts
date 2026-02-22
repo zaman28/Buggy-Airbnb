@@ -87,6 +87,23 @@ export const createReservation = async ({
     if (!listingId || !startDate || !endDate || !totalPrice)
       throw new Error("Invalid data");
 
+    // Check for overlapping reservations before creating
+    const existingReservations = await db.reservation.findMany({
+      where: {
+        listingId,
+        OR: [
+          {
+            startDate: { lte: endDate },
+            endDate: { gte: startDate },
+          },
+        ],
+      },
+    });
+
+    if (existingReservations.length > 0) {
+      throw new Error("These dates are already booked");
+    }
+
     await db.listing.update({
       where: {
         id: listingId,
@@ -198,8 +215,8 @@ export const createPaymentSession = async ({
     },
     metadata: {
       listingId,
-      startDate: String(startDate),
-      endDate: String(endDate),
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
       totalPrice,
       userId: user.id
     },

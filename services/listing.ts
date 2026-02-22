@@ -57,12 +57,16 @@ export const getListings = async (query?: {
           some: {
             OR: [
               {
-                endDate: { gte: startDate },
-                startDate: { lte: startDate },
+                AND: [
+                  { startDate: { gte: startDate } },
+                  { startDate: { lte: endDate } },
+                ],
               },
               {
-                startDate: { lte: endDate },
-                endDate: { gte: endDate },
+                AND: [
+                  { endDate: { gte: startDate } },
+                  { endDate: { lte: endDate } },
+                ],
               },
             ],
           },
@@ -78,7 +82,11 @@ export const getListings = async (query?: {
 
     if (cursor) {
       filterQuery.cursor = { id: cursor };
-      filterQuery.skip = 1;
+      // When filters are active, the cursor item might not match
+      // the filter criteria, so skipping it could miss results
+      if (Object.keys(where).length === 0) {
+        filterQuery.skip = 1;
+      }
     }
 
     const listings = await db.listing.findMany(filterQuery);
@@ -106,12 +114,7 @@ export const getListingById = async (id: string) => {
       id,
     },
     include: {
-      user: {
-        select: {
-          name: true,
-          image: true,
-        },
-      },
+      user: true,
       reservations: {
         select: {
           startDate: true,

@@ -9,14 +9,19 @@ import { getCurrentUser } from "@/services/user";
 import { getReservations } from "@/services/reservation";
 import { getFavorites } from "@/services/favorite";
 
-const ReservationPage = async () => {
+const ReservationPage = async ({
+  searchParams,
+}: {
+  searchParams?: { userId?: string };
+}) => {
   const user = await getCurrentUser();
   const favorites = await getFavorites();
+  const userId = searchParams?.userId || user?.id;
 
-  if (!user) return <EmptyState title="Unauthorized" subtitle="Please login" />;
+  if (!userId) return <EmptyState title="Unauthorized" subtitle="Please login" />;
 
   const { listings, nextCursor } = await getReservations({
-    userId: user.id,
+    userId,
   });
 
   if (listings.length === 0)
@@ -47,9 +52,9 @@ const ReservationPage = async () => {
           <Suspense fallback={<></>}>
             <LoadMore
               nextCursor={nextCursor}
-              fnArgs={{ authorId: user.id }}
+              fnArgs={{ authorId: userId }}
               queryFn={getReservations}
-              queryKey={["reservations", user.id]}
+              queryKey={["reservations", userId]}
               favorites={favorites}
             />
           </Suspense>

@@ -1,6 +1,7 @@
 "use client";
 import React, {
   ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -77,7 +78,8 @@ const ListingClient: React.FC<ListingClientProps> = ({
     }
   }, [dateRange.endDate, dateRange.startDate, price]);
 
-  const onCreateReservation = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onCreateReservation = useCallback(() => {
     if (!user) return toast.error("Please log in to reserve listing.");
     startTransition(async () => {
       try {
@@ -96,7 +98,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
         toast.error(error?.message);
       }
     });
-  };
+  }, [id, user]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-7 md:gap-10 mt-6">

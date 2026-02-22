@@ -43,6 +43,15 @@ export const updateFavorite = async ({
       throw new Error("Please sign in to favorite the listing!");
     }
 
+    // Verify the listing exists before updating favorites
+    const listing = await db.listing.findUnique({
+      where: { id: listingId },
+    });
+
+    if (!listing) {
+      throw new Error("Listing not found");
+    }
+
     let newFavorites;
     let hasFavorited;
 
